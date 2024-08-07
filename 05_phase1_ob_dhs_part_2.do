@@ -24,7 +24,7 @@ egen country_round = concat(country year), punct(" ")
 foreach country_code in  "gh" "cm" "np" "rw" {
 	clear
 	** change this filepath to in date 
-	cd "/Volumes/share/scratch/projects/hssa/asher/phase1/data/2024-06-20"
+cd "filepath"
 
 	use full_data.dta
 
@@ -37,7 +37,7 @@ foreach country_code in  "gh" "cm" "np" "rw" {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -56,7 +56,7 @@ esttab test using "`file_name_coef'", cells(b)  replace
 esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just 
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 
 
 estimates store test_pooled
 
@@ -68,7 +68,7 @@ esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 
 * regress endline only
 keep if baseline == 0
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5  
 
 estimates store test_endline
 
@@ -100,7 +100,7 @@ foreach country_code in   "gh" "cm" "np" "rw"  {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -119,8 +119,7 @@ esttab test using "`file_name_coef'", cells(b)  replace
 esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just 
-
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 
 estimates store test_pooled
 
 gen file_name_ci_test = "alt_dhs_oaxaca_15_19_ci_detail_test_part_2_" +  "`country_code'" + ".csv"
@@ -129,11 +128,9 @@ local file_name_ci_test = file_name_ci_test[1]
 * store confidence intervals
 esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 
-
 * regress endline only
 keep if baseline == 0
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just  
-
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5  
 estimates store test_endline
 
 gen file_name_ci_endline = "alt_dhs_oaxaca_15_19_ci_detail_endline_part_2_" +  "`country_code'" + ".csv"
@@ -141,8 +138,6 @@ local file_name_ci_endline = file_name_ci_endline[1]
 
 * store confidence intervals
 esttab test_endline using "`file_name_ci_endline'", ci(4) replace
-
-
 }
 
 

@@ -31,11 +31,10 @@ foreach country_code in  "gh" "cm" "np" "rw" {
 	keep if country == "`country_code'"  // Keep only the data for the current country_code
 	save "`country_code'_15_24.dta", replace  // Save the subset for the country
 	use "`country_code'_15_24.dta", clear
-
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca had_intercourse  age educ_single_yrs   curr_cohabit   wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca had_intercourse  age educ_single_yrs  curr_cohabit   wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -80,11 +79,12 @@ local file_name_ci_endline = file_name_ci_endline[1]
 esttab test_endline using "`file_name_ci_endline'", ci(4) replace
 }
 
+
 * for 15-19
 foreach country_code in  "gh" "cm" "np" "rw"   {
 	clear
 	** change this filepath to in date 
-  cd "filepath"
+	cd "filepath"
 
 	use full_data.dta
 	
@@ -93,11 +93,9 @@ foreach country_code in  "gh" "cm" "np" "rw"   {
 	save "`country_code'_15_19.dta", replace  // Save the subset for the country
 	use "`country_code'_15_19.dta", clear
 
-	
 	svyset psu_unique [pweight=pweight]
 
 oaxaca had_intercourse  age educ_single_yrs   curr_cohabit   wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
-
 estimates store test
 
 gen file_name_coef = "alt_dhs_oaxaca_15_19_coef_detail_part_1_" +  "`country_code'" + ".csv"

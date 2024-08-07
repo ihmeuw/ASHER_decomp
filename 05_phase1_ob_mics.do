@@ -1,5 +1,6 @@
 *==============================================================================
 * Title: ASHER Oaxaca-Blinder analysis for MICS data endline in Malawi
+* Date: March 21, 2024
 * Description: This do file conducts an Oaxaca-Blinder analysis for Malawi using two years of data (baseline and endline)
 * with DHS data as the baseline and MICS data as the endline
 *
@@ -24,7 +25,7 @@ egen country_round = concat(country year), punct(" ")
 foreach country_code in  "mw" {
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 
 	use full_data.dta
 	
@@ -34,7 +35,7 @@ foreach country_code in  "mw" {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -57,7 +58,7 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse
 
 estimates store test_pooled
 
@@ -76,7 +77,7 @@ esttab test_pooled using "`file_name_ci_pooled_table'", se star nogaps replace
 * regress endline only
 keep if baseline == 0
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse
 
 estimates store test_endline
 
@@ -95,7 +96,7 @@ esttab test_endline using "`file_name_ci_endline_table'", se star nogaps replace
 * regress baseline only
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 
 	use full_data.dta
 	
@@ -107,7 +108,7 @@ esttab test_endline using "`file_name_ci_endline_table'", se star nogaps replace
 
 keep if baseline == 1
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse
 
 ** cd to outdir: change this date to today's date
 cd "filepath"
@@ -127,7 +128,7 @@ esttab test_baseline using "`file_name_ci_baseline_table'", se star nogaps repla
 foreach country_code in  "mw" {
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 
 	use full_data.dta
 	
@@ -139,7 +140,7 @@ foreach country_code in  "mw" {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 *esttab using "Regression tables.csv", b(2) ci(4) compress label replace
@@ -163,7 +164,7 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse
 
 estimates store test_pooled
 
@@ -182,7 +183,7 @@ esttab test_pooled using "`file_name_ci_pooled_table'", se star nogaps replace
 * regress endline only
 keep if baseline == 0
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse
 
 estimates store test_endline
 
@@ -201,7 +202,7 @@ esttab test_endline using "`file_name_ci_endline_table'", se star nogaps replace
 * regress baseline only
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 
 	use full_data.dta
 	
@@ -214,7 +215,7 @@ esttab test_endline using "`file_name_ci_endline_table'", se star nogaps replace
 
 keep if baseline == 1
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse
 
 ** cd to outdir: change this date to today's date
 cd "filepath"

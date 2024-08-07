@@ -61,6 +61,7 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 svy: regress had_intercourse  age educ_single_yrs  curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5
 
+
 estimates store test_pooled
 
 gen file_name_ci_test = "alt_mics_oaxaca_15_24_ci_detail_test_part_1_" +  "`country_code'" + ".csv"
@@ -126,7 +127,6 @@ esttab test using "`file_name_ci'", ci(4) replace
 * regress pooled 
 
 svy: regress had_intercourse  age educ_single_yrs  curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5
-
 
 estimates store test_pooled
 

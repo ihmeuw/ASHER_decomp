@@ -176,7 +176,7 @@ for (cur_country in countries) {
                      "employed","fp_exp_media","decision_use_joint_respondent","condom_ed","knowledge_mod",
                      "contra_source_public","contra_source_priv","contra_source_other","fp_exp_media",
                      "fp_hcw12m","fp_facility12m","get_condom","sex_cash","refuse_sex","ask_condom","sexual_violence","sex_partners"
-  )
+                     )
   
   # subset data to columns of interest
   indicators <- names(dt)[names(dt) %in% possible_vars]
@@ -206,7 +206,7 @@ for (cur_country in countries) {
     coord_fixed()
   print(gg)
   ggsave(file.path(out.dir_diagnostics, paste0(cur_country, "_heatmap_data_availability_15_49.png")), w=14, h=4)
-  
+ 
   
   # check data availability (15-19)
   data_avail_test <- data_test[age %in% 15:19, lapply(.SD, function(x) sum(!is.na(x))/.N), by = "survey"]

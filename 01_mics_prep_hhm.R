@@ -32,6 +32,8 @@ out.dir <- "FILEPATH"
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
 
+
+
 # EXTRACT DATA FUNCTION -----------------------------------------------
 
 extract_data <- function(survey, cur_country) {
@@ -194,6 +196,7 @@ extract_data <- function(survey, cur_country) {
   
   message(paste0("Successfully saved ", file_name))
 }
+
 
 # RUN EXTRACTIONS ---------------------------------------------------
 

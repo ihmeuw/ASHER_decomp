@@ -60,7 +60,7 @@ extract_data <- function(survey, cur_country) {
   dt[, cluster := v001]
   dt[, hh_id := v002]
   dt[, id := v003] 
-  
+
   # interview date
   dt[, cmc_interview_date := v008]
   
@@ -98,7 +98,7 @@ extract_data <- function(survey, cur_country) {
         mutate(preg_id = as.integer(sub("bord9_", "", variable))) %>% dplyr::select(-variable) %>% as.data.table
       dt_long <- dt_long[!is.na(preg_order)]
     }
-    
+
     if (grepl("NPL_DHS7", survey)) {
       # CMC date pregnancy ended
       tmp <- melt(data = dt, id.vars = id.vars, measure.vars = patterns("^s215c_."), value.name = "preg_end_cmc") %>% 
@@ -146,7 +146,7 @@ extract_data <- function(survey, cur_country) {
         mutate(preg_id = as.integer(sub("s227_", "", variable))) %>% dplyr::select(-variable) %>% as.data.table
       dt_long <- merge(dt_long, tmp, by = c(id.vars, "preg_id"), all.x = T)
     }
-    
+
     # months since pregnancy outcome
     dt_long[, preg_months_since_outcome := cmc_interview_date - preg_end_cmc]
     
@@ -179,8 +179,8 @@ extract_data <- function(survey, cur_country) {
     
     dt <- copy(dt_long)
   }
-  
-  
+ 
+ 
   # EXTRACT FROM PREG FILE ------------------------------------------
   message("||---Extracting from pregnancy file")
   

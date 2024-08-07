@@ -15,7 +15,7 @@ clear
 ** change this filepath to in date 
 cd "filepath"
 
-import delimited ob_input_prepped_df_dhs_sensitivity.csv
+import delimited ob_input_prepped_df_dhs.csv
 
 save full_data.dta, replace
 egen country_round = concat(country year), punct(" ")

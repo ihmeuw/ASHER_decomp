@@ -18,11 +18,13 @@ cd "filepath"
 import delimited ob_input_prepped_df_dhs.csv
 save full_data.dta, replace
 
+egen country_round = concat(country year), punct(" ")
+
 * for 15-24 
 foreach country_code in  "gh" "cm" "np" "rw" {
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 
 	use full_data.dta
 	
@@ -33,7 +35,7 @@ foreach country_code in  "gh" "cm" "np" "rw" {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs   curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs   curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -55,7 +57,7 @@ esttab test using "`file_name_coef'", cells(b)  replace
 esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just 
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse 
 
 estimates store test_pooled
 
@@ -74,7 +76,7 @@ esttab test_pooled using "`file_name_ci_pooled_table'", se star nogaps replace
 
 * regress endline only
 keep if baseline == 0
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse  
 
 estimates store test_endline
 
@@ -101,11 +103,10 @@ clear
 	save "`country_code'_15_24.dta", replace  // Save the subset for the country
 	use "`country_code'_15_24.dta", clear
 
-	
 	svyset psu_unique [pweight=pweight]
 	
 keep if baseline == 1
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse  
 
 ** cd to outdir: change this date to today's date
 cd "filepath"
@@ -143,7 +144,7 @@ foreach country_code in  "gh" "cm" "np" "rw"  {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -165,7 +166,7 @@ esttab test using "`file_name_coef'", cells(b)  replace
 esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just 
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse 
 
 estimates store test_pooled
 
@@ -183,7 +184,7 @@ esttab test_pooled using "`file_name_ci_pooled_table'", se star nogaps replace
 
 * regress endline only
 keep if baseline == 0
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse  
 
 estimates store test_endline
 
@@ -211,12 +212,11 @@ esttab test_endline using "`file_name_ci_endline_table'", se star nogaps replace
 	keep if age < 20 & age > 14 
 	save "`country_code'_15_19.dta", replace  // Save the subset for the country
 	use "`country_code'_15_19.dta", clear
-
 	
 	svyset psu_unique [pweight=pweight]
 	
 keep if baseline == 1
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse beating_just  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs  curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 had_intercourse  
 
 ** cd to outdir: change this date to today's date
 cd "filepath"

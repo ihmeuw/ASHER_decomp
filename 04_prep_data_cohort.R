@@ -281,7 +281,7 @@ for (cur_country in countries) {
     dt[is.na(attend_school) | attend_school == 0, educ_yrs_timevary := ifelse(age - educ_single_yrs >= diff_age_grade, educ_single_yrs, educ_single_yrs - (diff_age_grade - (age - educ_single_yrs)))]
     dt[is.na(attend_school) | attend_school == 0, educ_yrs_timevary := min(educ_yrs_timevary), by = c("id_unique", "school_year")]  # align with school years
     
-    
+
     ## currently attending school (only asked to 15-24)
     dt[, attend_school_timevary := attend_school]
     dt[educ_single_yrs != educ_yrs_timevary, attend_school_timevary := 1]
@@ -317,3 +317,5 @@ for (cur_country in countries) {
     write.csv(dt, file.path(out.dir, paste0(survey, "_cohort_prepped.csv")), row.names = F)
   }
 }
+
+  

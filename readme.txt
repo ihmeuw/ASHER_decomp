@@ -1,6 +1,6 @@
 # IHME ASHER Decomposition
 
-This code was written to conduct a decomposition analysis in support of the Adolescent Sexual and Reproductive Health and Rights Exemplars (ASHER) project. The duration of this project was from October 2023 to April 2024, with additional development by Corinne Bintz for the HMS capstone from May 2024 to August 2024. For any questions or comments, please contact the project lead, Annie Haakenstad, at ahaak@uw.edu.
+This code was written to conduct a decomposition analysis in support of the Adolescent Sexual and Reproductive Health and Rights Exemplars (ASHER) project. The duration of this project was from October 2023 to April 2024. For any questions or comments, please contact the project lead, Annie Haakenstad, at ahaak@uw.edu.
 
 Supporting Members: Annie Haakenstad, Corinne Bintz, Olivia Angelino, Abby Chapin & Steve Lim
 

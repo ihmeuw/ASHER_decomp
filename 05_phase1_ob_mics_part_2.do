@@ -25,7 +25,7 @@ egen country_round = concat(country year), punct(" ")
 foreach country_code in  "mw" {
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 
 	use full_data.dta
 	
@@ -37,7 +37,7 @@ foreach country_code in  "mw" {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -57,7 +57,7 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5
 
 estimates store test_pooled
 
@@ -70,7 +70,7 @@ esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 * regress endline only
 keep if baseline == 0
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5
 
 estimates store test_endline
 
@@ -98,11 +98,9 @@ foreach country_code in  "mw" {
 	save "`country_code'_15_19.dta", replace  // Save the subset for the country
 	use "`country_code'_15_19.dta", clear
 
-	
 	svyset psu_unique [pweight=pweight]
 
-
-oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 *esttab using "Regression tables.csv", b(2) ci(4) compress label replace
@@ -112,7 +110,6 @@ local file_name_coef = file_name_coef[1]
 
 gen file_name_ci = "alt_mics_oaxaca_15_19_ci_detail_part_2_" +  "`country_code'" + ".csv"
 local file_name_ci = file_name_ci[1]
-
 
 ** cd to outdir: change this date to today's date
 cd "filepath"
@@ -124,7 +121,7 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5
 
 estimates store test_pooled
 
@@ -137,7 +134,7 @@ esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 * regress endline only
 keep if baseline == 0
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5
 
 estimates store test_endline
 

@@ -35,6 +35,7 @@ out.dir <- "FILEPATH"
 # countries to create wealth index for
 countries <- c("cm", "gh", "mw", "np", "rw")
 
+
 # PROCESS WEALTH QUINTILE FUNCTION ---------------------------------
 
 process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = F) {
@@ -52,7 +53,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   if (baseline_endline == T) {
     
     # update out_dir
-    out.dir <- 'FILEPATH'
+    out.dir <- "FILEPATH"
     
     # subset files
     if (cur_country == "rw") files <- files[grepl("DHS4_2000|DHS8_2019", files)]
@@ -66,7 +67,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   if (cohort == T) {
     
     # update out_dir
-    out.dir <- 'FILEPATH'
+    out.dir <- "FILEPATH"
     
     # subset files
     if (cur_country == "rw") files <- files[grepl("DHS6_2010|DHS7_2014|DHS8_2019", files)]
@@ -91,7 +92,6 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   data_avail_all <- dcast(melt(data_avail_all, id.vars = "survey"), formula = variable ~ survey)
   write.csv(data_avail_all, file.path(out.dir, paste0(cur_country, "_data_availability_all_vars.csv")), row.names = F)
   
-  
   # list of variables to test PCA
   possible_vars <- c("survey", "hhid_unique", "memsleep", "electricity", "radio", "fridge", "bike", "moto", "car",
                      "land_ph", "mobile_ph", "watch", "animal_cart", "motor_boat", "internet",
@@ -110,7 +110,6 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   data_avail_test <- data_test[, lapply(.SD, function(x) sum(!is.na(x))/.N), by = "survey"]
   data_avail_test <- dcast(melt(data_avail_test, id.vars = "survey"), formula = variable ~ survey)
   write.csv(data_avail_test, file.path(out.dir, paste0(cur_country, "_data_availability_test_vars.csv")), row.names = F)
-  
   
   # visualize data availability heat map
   plot_dt <- melt(data_avail_test, id.vars = "variable", variable.name = "survey")
@@ -274,7 +273,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   wealth_dt$windex5 <- data$windex5
   
   
-  # EXPORT RESULTS ---------------------------------------------
+  # VISUALIZE RESULTS ---------------------------------------------
   
   # plot distributions of quintiles by survey
   plot_dt <- wealth_dt[, .(count = .N), by = c("survey", "wealth_quintiles")]
@@ -295,9 +294,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   }
  
   
-    
-  
-  # VISUALIZE RESULTS ---------------------------------------------
+  # EXPORT RESULTS ---------------------------------------------
   
   # save constructed wealth scores and quintiles
   write.csv(wealth_dt, file.path(out.dir, paste0(cur_country, "_wealth_quintile_estimates.csv")), row.names = FALSE)
