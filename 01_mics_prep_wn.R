@@ -190,13 +190,6 @@ extract_data <- function(survey, cur_country) {
   if (grepl("MICS3", survey)) dt[, age_first_cohabit := agem]
   if (grepl("MICS[4-6]", survey)) dt[, age_first_cohabit := wagem]
 
-
-  # # literacy
-  # # currently not needed, but if so (rwa 2000 = hl8? mics 3 = wm14, mics4/5 = wb7, mics 6 = wb14)
-  # dt[, no_read := ifelse(wb14 == 0, 1, 0) ]
-  # dt[wb14==3, no_read := NA]
-  # dt[wb14 == 4, no_read:= NA]
-
   # education
   if ("melevel" %in% names(dt)) dt[, edu_level_categ_wn := as.character(as_factor(melevel))] 
   if ("welevel" %in% names(dt)) dt[, edu_level_categ_wn := as.character(as_factor(welevel))] 

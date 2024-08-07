@@ -102,7 +102,7 @@ extract_data <- function(survey, cur_country) {
                                     ifelse(grepl("MICS3", survey), ed3b,
                                            ifelse(grepl("MICS[4-5]", survey), ed4b, ed5b)))]
 
-  # calculate education level achieved using Education team's custom code
+  # calculate education level achieved
   
   # set responses such as "dk", "missing", "none" or "preschool" to NA
   mask_edu_years_level <- dt$edu_years_in_level > 90

@@ -35,13 +35,6 @@ out.dir <- "FILEPATH"
 # countries to create wealth index for
 countries <- c("cm", "gh", "mw", "np", "rw")
 
-## check factors generally in the direction you would expect with each other
-# for example, factors associated with more wealth (eg tv) are positive 
-## in ghana, water_improve is doing funny things (negative) 
-#will keep with h2o_home only but may want to add home + improve in other countries
-## any land is also odd, probably about agriculture, also omitting 
-
-
 # PROCESS WEALTH QUINTILE FUNCTION ---------------------------------
 
 process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = F) {
@@ -281,7 +274,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   wealth_dt$windex5 <- data$windex5
   
   
-  # VISUALIZE RESULTS ---------------------------------------------
+  # EXPORT RESULTS ---------------------------------------------
   
   # plot distributions of quintiles by survey
   plot_dt <- wealth_dt[, .(count = .N), by = c("survey", "wealth_quintiles")]
