@@ -10,3 +10,4 @@ Order of operations:
 03 scripts: merge prepared extraction files for DHS and MICS
 04 scripts: prepare data for Oaxaca Blinder and cohort modeling, construct additional variables 
 05 scripts: run and test various Oaxaca Blinder and cox proportional hazard cohort models
+06 scripts: plotting code
