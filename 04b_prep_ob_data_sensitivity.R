@@ -77,7 +77,7 @@ ind_dt[, rural := ifelse(urban == 0,1,0)]
 
 # CLEAN DATA --------
 ## read in list of variable names
-variable_list <- data.table(read_xlsx('/share/scratch/projects/hssa/asher/variable_availability.xlsx'))
+variable_list <- data.table(read_xlsx('filepath/variable_availability.xlsx'))
 variable_list_dhs <- variable_list[DHS_sensitivity == 'Y']
 variable_list_mics <- variable_list[MICS_sensitivity == 'Y']
 
