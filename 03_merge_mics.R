@@ -33,7 +33,6 @@ out.dir <- "FILEPATH"
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
 
-
 # PREP FILES --------------------------------------------------------
 
 # countries to merge files for

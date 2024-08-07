@@ -1,7 +1,7 @@
-##-------------------Header------------------------------------------------
+## HEADER --------
 ## Project: IHME ASHER Decomposition
-## Creation date: 2/28/24
-## Set up data for ASHER Oaxaca-Blinder analysis 
+## Creation date: 6/26/2024
+## Set up data for ASHER Oaxaca-Blinder analysis using pooled data instead of just baseline endline
 
 rm(list=ls())
 username <- Sys.info()[["user"]]
@@ -20,9 +20,6 @@ if (Sys.info()["sysname"] == "Linux") {
 
 '%ni%' <- Negate('%in%')
 
-## set endline to either mics or dhs (for Malawi)
-endline <- "MICS"
-
 pacman::p_load(data.table,magrittr,tidyverse,parallel,ggrepel,plyr,viridis,scales,ggridges,openxlsx,readxl,ggpubr,dplyr,RColorBrewer, haven, survey,tidyr,glmnet)
 
 # create function to convert CMC date to year and month
@@ -30,34 +27,29 @@ get_cmc_year <- function(x) 1900 + as.integer((as.integer(x) - 1) / 12)
 get_cmc_month <- function(x) as.integer(x) - 12 * (get_cmc_year(x) - 1900)
 
 # directories
-out.dir <- "filepath"
+out.dir <- file.path('filepath', Sys.Date())
 dir.create(out.dir, recursive = T)
 
-in.dir <- "filepath"
+in.dir <- 'filepath'
 
 prep_data <- function(endline){
-  ## LOAD DATA --------
-  if (endline == "DHS"){
-    files <- list.files(in.dir)
-    ind_dt <-rbindlist(lapply(file.path(in.dir, files), fread), fill = TRUE)
-  } else{
-    files <- list.files(in.dir)
-    files <- files[!grepl("mw", files)]
-    ind_dt <-rbindlist(lapply(file.path(in.dir, files), fread), fill = TRUE)
-    
-    ## read in malawi data
-    files <- list.files(in.dir)
-    files <- files[grepl("mw_baseline_endline_mics.csv", files)]
-    mw_dt <-rbindlist(lapply(file.path(in.dir, files), fread), fill = TRUE)
-    mw_dt[, wealth_quintiles := ifelse(is.na(wealth_quintiles), windex5, wealth_quintiles)]
-    mw_dt <- mw_dt[, -c("windex5")]
-    
-    ## add on malawi
-    ind_dt <- rbind(ind_dt, mw_dt, fill = T)
-  }
+  files <- list.files(in.dir)
+  files <- files[grepl("all_yrs_prepped", files)]
+  ind_dt <-rbindlist(lapply(file.path(in.dir, files), fread), fill = TRUE)
+  ind_dt[country == "MW", wealth_quintiles := ifelse(is.na(wealth_quintiles), windex5, wealth_quintiles)]
   
-  ## rename wealth quintiles to wealth index
+    ## rename wealth quintiles to wealth index
   setnames(ind_dt, "wealth_quintiles", "wealth_index")
+  
+  # exclude surveys:
+  # CMR MICS 2000: missing sexual activity (already excluded)
+  # RWA MICS 2000: missing any live births in the past 2 years (already excluded)
+  # NPL DHS 2001: ever married only
+  # NPL MICS 2010: missing sexual activity
+  # NPL MICS 2014: missing sexual activity
+  # NPL MICS 2018-2019: ever married only
+  
+  ind_dt <- ind_dt[survey %ni% c("NPL_DHS4_2001","NPL_MICS4_2010", "NPL_MICS5_2014", "NPL_MICS6_2019")]
   
   ## CREATE OUTCOMES ----
   ## construct outcome to use with dhs endline: in the last 2 years or currently preg, include terminations 
@@ -86,20 +78,14 @@ prep_data <- function(endline){
   ## subset input data just to these variables
   input_df <- ind_dt[,names(ind_dt)%in% variables,with=FALSE]
   
-  ## label baseline so we can group data for oaxaca-blinder
-  input_df[, latest := max(year), by = "country"]
-  input_df[, baseline := ifelse(year == latest, 0,1)]
-  
-  input_df <- input_df[, -c("latest")] # don't need this column anymore
-  
   ## filter to just women aged 15-24
-  input_df_15_24 <- input_df[age %in% c(seq(15,24))] #54901 rows
+  input_df_15_24 <- input_df[age %in% c(seq(15,24))] 
   
   ## subpop: had sex
   # age_1st_sex_imp
   input_df_15_24[had_intercourse == 0 & is.na(age_1st_sex_imp), age_1st_sex_imp := 0]
   
-  ## determine percent missing
+  ## determine percent missing per variable
   missing_dt_pooled <- data.table()
   for (var in colnames(input_df_15_24)){
     nobs_var <- nrow(input_df_15_24[!is.na(get(var))])
@@ -126,8 +112,7 @@ prep_data <- function(endline){
   input_df_15_24_no_na[, psu_unique := paste(country, year, cluster)]
   
   ## EXPORT DATA ---------
-  write.csv(input_df_15_24_no_na, file.path(out.dir, paste0('ob_input_prepped_df_', tolower(endline), '.csv')), row.names=F)
-
+  write.csv(input_df_15_24_no_na, file.path(out.dir, paste0('ob_input_prepped_df_pooled_', tolower(endline), '.csv')), row.names=F)
 }
 prep_data("MICS")
 prep_data("DHS")

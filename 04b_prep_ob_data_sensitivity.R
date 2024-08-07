@@ -77,7 +77,7 @@ ind_dt[, rural := ifelse(urban == 0,1,0)]
 
 # CLEAN DATA --------
 ## read in list of variable names
-variable_list <- data.table(read_xlsx(file.path("filepath", 'variable_availability.xlsx')))
+variable_list <- data.table(read_xlsx('/share/scratch/projects/hssa/asher/variable_availability.xlsx'))
 variable_list_dhs <- variable_list[DHS_sensitivity == 'Y']
 variable_list_mics <- variable_list[MICS_sensitivity == 'Y']
 
@@ -127,8 +127,8 @@ input_df_15_24_no_na[, psu_unique := paste(country, year, cluster)]
 
 ## EXPORT DATA ---------
 if (endline == 'DHS'){
-  write.csv(input_df_15_24_no_na, file.path(out.dir, 'ob_input_prepped_df_dhs.csv'), row.names=F)
+  write.csv(input_df_15_24_no_na, file.path(out.dir, 'ob_input_prepped_df_dhs_sensitivity.csv'), row.names=F)
 } else{
-  write.csv(input_df_15_24_no_na, file.path(out.dir, 'ob_input_prepped_df_mics.csv'), row.names=F)
+  write.csv(input_df_15_24_no_na, file.path(out.dir, 'ob_input_prepped_df_mics_sensitivity.csv'), row.names=F)
 }
 

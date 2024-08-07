@@ -1,18 +1,21 @@
-## Creation date: 2/19/2024
-## Shapely decomp for ASHER phase 1
+# Project: IHME ASHER Decomposition
+# Creation date: 2/19/2024
+# Shapely decomp for ASHER phase 1
+
+# clear memory
 rm(list=ls())
 username <- Sys.info()[["user"]]
 
 if (Sys.info()["sysname"] == "Linux") {
-  j <- "filepath"
-  h <- "filepath"
-  r <- "filepath"
-  l <-"filepath"
+  j <- "FILEPATH"
+  h <- "FILEPATH"
+  r <- "FILEPATH"
+  l <- "FILEPATH"
 } else {
-  j <-"filepath"
-  h <- "filepath"
-  r <- "filepath"
-  l <- "filepath"
+  j <- "FILEPATH"
+  h <- "FILEPATH"
+  r <- "FILEPATH"
+  l <- "FILEPATH"
 }
 
 pacman::p_load(relaimpo, data.table,magrittr,tidyverse,parallel,ggrepel,plyr,viridis,scales,ggridges,openxlsx,readxl,ggpubr,dplyr,RColorBrewer, 
@@ -22,13 +25,13 @@ pacman::p_load(relaimpo, data.table,magrittr,tidyverse,parallel,ggrepel,plyr,vir
 in.date <- '2024-04-06'
 
 ## directories
-data_dir <- file.path("filepath", in.date)
+data_dir <- file.path('filepath', in.date)
 
 ## directories 
-in.dir <- file.path("filepath", in.date)
-out.dir <- file.path("filepath", Sys.Date())
+in.dir <- file.path('filepath', in.date)
+out.dir <- file.path('filepath', Sys.Date())
 dir.create(out.dir, showWarnings = FALSE)
-out.dir <- file.path("filepath", Sys.Date(), '/ob_vars_only')
+out.dir <- file.path('filepath', Sys.Date(), '/ob_vars_only')
 dir.create(out.dir, showWarnings = FALSE)
 
 # pretty variable labels 

@@ -39,7 +39,7 @@ extract_data <- function(survey, cur_country) {
   
   # read in data 
   dt <- data.table(read_dta(survey))
-
+  
   
   # SURVEY CHARACTERISTICS --------------------------------------
   message("||---Survey characteristics")
@@ -57,13 +57,13 @@ extract_data <- function(survey, cur_country) {
   dt[, id := hvidx] 
   dt[, area_unit := hv004]
   dt[, country := cur_country]
-
+  
   # unique hh id for each household
   dt[, hhid_unique := paste(hh_id, cluster)]
   
   # unique individual id for each household member
   dt[, id_unique := paste(hhid_unique, id)]
-
+  
   
   # EDUCATION VARIABLES ----------------------------------------
   message("||---Education variables")

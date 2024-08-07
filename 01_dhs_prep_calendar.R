@@ -48,7 +48,7 @@ extract_data <- function(survey, cur_country) {
   
   # convert variable names to lowercase
   names(dt) <- tolower(names(dt))
-
+  
   # extract survey name and add to dt
   survey_name <- str_extract(survey, "[A-Z]{3}_DHS[0-9]_[0-9]{4}(_[0-9]{4})*")
   dt[, survey := survey_name]
@@ -79,7 +79,7 @@ extract_data <- function(survey, cur_country) {
   
   ## INDIVIDUAL CHARACTERISTICS -----------------------------------
   message("||---Individual characteristics")
-
+  
   # DOB of woman (cmc)
   dt[, cmc_woman_dob := v011]
   
@@ -122,7 +122,7 @@ extract_data <- function(survey, cur_country) {
     # add onto calendar_long
     calendar_long <- rbind(calendar_long, tmp, fill = T)
   }
- 
+  
   # create column with real and cmc dates and remove empty rows after the interview month
   calendar_long[, month := months[month_num]]
   calendar_long[, month_cmc := months_cmc[month_num]]
@@ -131,7 +131,7 @@ extract_data <- function(survey, cur_country) {
   # parse out the corresponding contraceptive use/birth events
   calendar_long[, event := substr(calendar_contra_use, month_num, month_num)]
   calendar_long[, reason := substr(calendar_reason_discont, month_num, month_num)]
- 
+  
   # update event to missing if it is empty
   calendar_long[event == " ", event := "?"]
   
@@ -193,7 +193,7 @@ extract_data <- function(survey, cur_country) {
   
   ## PROCESS VARIABLES ---------------------------------------------
   message("||---Process variables")
-
+  
   # calculate age for each month
   calendar_long[, age := as.integer((month_cmc - cmc_woman_dob)/12)]
   
@@ -220,7 +220,7 @@ extract_data <- function(survey, cur_country) {
   calendar_long[, wanted_more_effective_method := ifelse(reason_recode == "wanted a more effective method", 1, 0)]
   calendar_long[, other_method_related := ifelse(reason_recode %in% c("access/availability", "inconvenient to use", "cost too much"), 1, 0)]
   calendar_long[, other_dk := ifelse(method_failure == 0 & desire_to_become_pregnant == 0 & other_fertility_related_reasons == 0 & side_effects_health_concerns == 0 &
-                                wanted_more_effective_method == 0 & other_method_related == 0, 1, 0)]
+                                       wanted_more_effective_method == 0 & other_method_related == 0, 1, 0)]
   
   
   # EXPORT CLEANED DATA --------------------------------------------
@@ -257,4 +257,3 @@ extract_data("/FILEPATH/MWI_DHS7_2015_2016_WN.DTA", "mw")
 extract_data("/FILEPATH/RWA_DHS6_2010_2011_WN.DTA", "rw")
 extract_data("/FILEPATH/RWA_DHS7_2014_2015_WN.DTA", "rw")
 extract_data("/FILEPATH/RWA_DHS8_2019_2020_WN.DTA", "rw")
-

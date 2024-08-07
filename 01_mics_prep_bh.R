@@ -154,4 +154,3 @@ extract_data("/FILEPATH/MWI_MICS6_2019_2020_BH.DTA", "mw")
 # Ghana
 extract_data("/FILEPATH/GHA_MICS4_2011_BH.DTA", "gh")
 extract_data("/FILEPATH/GHA_MICS6_2017_2018_BH.DTA", "gh")
-

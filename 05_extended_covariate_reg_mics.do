@@ -15,7 +15,7 @@ clear
 ** change this filepath to in date 
 cd "filepath"
 
-import delimited ob_input_prepped_df_dhs.csv
+import delimited ob_input_prepped_df_dhs_sensitivity.csv
 
 save full_data.dta, replace
 egen country_round = concat(country year), punct(" ")
@@ -24,7 +24,7 @@ egen country_round = concat(country year), punct(" ")
 foreach country_code in  "gh" "cm" "np" "rw" {
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+  cd "filepath"
 	
 	use full_data.dta
 	keep if age < 20 & age > 14 

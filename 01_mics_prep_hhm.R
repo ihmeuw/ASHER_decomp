@@ -32,8 +32,6 @@ out.dir <- "FILEPATH"
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
 
-
-
 # EXTRACT DATA FUNCTION -----------------------------------------------
 
 extract_data <- function(survey, cur_country) {
@@ -104,7 +102,7 @@ extract_data <- function(survey, cur_country) {
                                     ifelse(grepl("MICS3", survey), ed3b,
                                            ifelse(grepl("MICS[4-5]", survey), ed4b, ed5b)))]
 
-  # calculate education level achieved
+  # calculate education level achieved using Education team's custom code
   
   # set responses such as "dk", "missing", "none" or "preschool" to NA
   mask_edu_years_level <- dt$edu_years_in_level > 90
@@ -196,7 +194,6 @@ extract_data <- function(survey, cur_country) {
   
   message(paste0("Successfully saved ", file_name))
 }
-
 
 # RUN EXTRACTIONS ---------------------------------------------------
 

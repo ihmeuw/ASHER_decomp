@@ -190,6 +190,13 @@ extract_data <- function(survey, cur_country) {
   if (grepl("MICS3", survey)) dt[, age_first_cohabit := agem]
   if (grepl("MICS[4-6]", survey)) dt[, age_first_cohabit := wagem]
 
+
+  # # literacy
+  # # currently not needed, but if so (rwa 2000 = hl8? mics 3 = wm14, mics4/5 = wb7, mics 6 = wb14)
+  # dt[, no_read := ifelse(wb14 == 0, 1, 0) ]
+  # dt[wb14==3, no_read := NA]
+  # dt[wb14 == 4, no_read:= NA]
+
   # education
   if ("melevel" %in% names(dt)) dt[, edu_level_categ_wn := as.character(as_factor(melevel))] 
   if ("welevel" %in% names(dt)) dt[, edu_level_categ_wn := as.character(as_factor(welevel))] 
@@ -471,15 +478,15 @@ extract_data <- function(survey, cur_country) {
     # set infecund to 1 if has not had a birth in the preceding 5 years, has never used contraception (or is not using if never not avail),
     # and is currently married and was continuously married during the preceding 5 years (can only determine if in first marriage/union)
     if ("never_used_contra" %in% names(dt)) {
-      dt[curr_cohabit == 1 &                                             # currently married/in-union
-           never_used_contra == 1 &                                      # never used contraception
-           in_first_cohabit == 1 &                                       # in first marriage/union
+      dt[curr_cohabit == 1 &                                            # currently married/in-union
+           never_used_contra == 1 &                                     # never used contraception
+           in_first_cohabit == 1 &                                      # in first marriage/union
            cmc_interview_date - cmc_last_child >= 60 &                   # no births in last 5 years
            cmc_interview_date - cmc_first_cohabit >= 60, infecund := 1]  # been married continuously in last 5 years
     } else {
-      dt[curr_cohabit == 1 &                                             # currently married/in-union
-           any_contra == 0 &                                             # currently not using contraception
-           in_first_cohabit == 1 &                                       # in first marriage/union
+      dt[curr_cohabit == 1 &                                            # currently married/in-union
+           any_contra == 0 &                                            # currently not using contraception
+           in_first_cohabit == 1 &                                      # in first marriage/union
            cmc_interview_date - cmc_last_child >= 60 &                   # no births in last 5 years
            cmc_interview_date - cmc_first_cohabit >= 60, infecund := 1]  # been married continuously in last 5 years
     }
@@ -588,6 +595,7 @@ extract_data <- function(survey, cur_country) {
   
   message(paste0("Successfully saved ", file_name))
 }
+
 
 
 # RUN EXTRACTIONS ---------------------------------------------------
