@@ -3,6 +3,7 @@
 * Date: March 21, 2024
 * Description: This do file conducts an Oaxaca-Blinder analysis for Malawi using two years of data (baseline and endline): part 2, outcome of any birth or pregnancy among women who have had sex 
 * with DHS data as the baseline and MICS data as the endline
+* sensitivity analysis using logit 
 *
 * Data Source: DHS and MICS surveys 
 * Notes: 
@@ -37,14 +38,14 @@ foreach country_code in  "mw" {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax logit
 
 estimates store test
 
-gen file_name_coef = "alt_mics_oaxaca_15_24_coef_detail_part_2_" +  "`country_code'" + ".csv"
+gen file_name_coef = "alt_mics_oaxaca_15_24_coef_detail_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_coef = file_name_coef[1]
 
-gen file_name_ci = "alt_mics_oaxaca_15_24_ci_detail_part_2_" +  "`country_code'" + ".csv"
+gen file_name_ci = "alt_mics_oaxaca_15_24_ci_detail_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_ci = file_name_ci[1]
 
 ** cd to outdir: change this date to today's date
@@ -57,11 +58,11 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: logit any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
 
 estimates store test_pooled
 
-gen file_name_ci_test = "alt_mics_oaxaca_15_24_ci_detail_test_part_2_" +  "`country_code'" + ".csv"
+gen file_name_ci_test = "alt_mics_oaxaca_15_24_ci_detail_test_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_ci_test = file_name_ci_test[1]
 
 * store confidence intervals
@@ -70,11 +71,11 @@ esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 * regress endline only
 keep if baseline == 0
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: logit any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
 
 estimates store test_endline
 
-gen file_name_ci_endline = "alt_mics_oaxaca_15_24_ci_detail_endline_part_2_" +  "`country_code'" + ".csv"
+gen file_name_ci_endline = "alt_mics_oaxaca_15_24_ci_detail_endline_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_ci_endline = file_name_ci_endline[1]
 
 * store confidence intervals
@@ -102,15 +103,15 @@ foreach country_code in  "mw" {
 	svyset psu_unique [pweight=pweight]
 
 
-oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax logit
 
 estimates store test
 *esttab using "Regression tables.csv", b(2) ci(4) compress label replace
 
-gen file_name_coef = "alt_mics_oaxaca_15_19_coef_detail_part_2_" +  "`country_code'" + ".csv"
+gen file_name_coef = "alt_mics_oaxaca_15_19_coef_detail_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_coef = file_name_coef[1]
 
-gen file_name_ci = "alt_mics_oaxaca_15_19_ci_detail_part_2_" +  "`country_code'" + ".csv"
+gen file_name_ci = "alt_mics_oaxaca_15_19_ci_detail_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_ci = file_name_ci[1]
 
 
@@ -124,11 +125,11 @@ esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: logit any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
 
 estimates store test_pooled
 
-gen file_name_ci_test = "alt_mics_oaxaca_15_19_ci_detail_test_part_2_" +  "`country_code'" + ".csv"
+gen file_name_ci_test = "alt_mics_oaxaca_15_19_ci_detail_test_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_ci_test = file_name_ci_test[1]
 
 * store confidence intervals
@@ -137,11 +138,11 @@ esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 * regress endline only
 keep if baseline == 0
 
-svy: regress any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
+svy: logit any_birth_preg_2_yr_mics  age educ_single_yrs age_1st_sex_imp curr_cohabit unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just
 
 estimates store test_endline
 
-gen file_name_ci_endline = "alt_mics_oaxaca_15_19_ci_detail_endline_part_2_" +  "`country_code'" + ".csv"
+gen file_name_ci_endline = "alt_mics_oaxaca_15_19_ci_detail_endline_part_2_logit_" +  "`country_code'" + ".csv"
 local file_name_ci_endline = file_name_ci_endline[1]
 
 * store confidence intervals

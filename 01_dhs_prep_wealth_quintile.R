@@ -118,7 +118,7 @@ extract_data <- function(survey, cur_country) {
   if ("hv246" %in% names(df)) dt[, any_livestock := ifelse(hv246 == 1, 1, ifelse(hv246 == 0, 0, NA))]
   
   # generate continuous counts
-  # these are the standardized livestock variables, beyond 'f' can vary
+  # these are the standardized livestock variables, beyond f can vary
   if ("hv246a" %in% names(dt)) dt[, cattle_only := as.integer(hv246a > 0)]
   if ("hv246b" %in% names(dt)) dt[, cows_only := as.integer(hv246b > 0)]
   if ("hv246c" %in% names(dt)) dt[, horse_donk := as.integer(hv246c > 0)]

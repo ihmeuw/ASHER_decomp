@@ -311,7 +311,7 @@ extract_data <- function(survey, cur_country) {
   diaphragm <- paste(c("diaphr", "diafrag", "cervical cap", "cones"), collapse = "|")
   foam_gel_sponge <- paste(c("tablet", "foam", "jelly", "jalea", "mousse", "espuma", "creme", "cream", "crema", "gel", "gelee", "spermicid", "eponge", "intravag",
                              "esponja", "esonja", "sponge", "vaginale", "comprimidos vaginais", "vaginal method", "suppository", "vaginals", "metodos vaginal"), collapse = "|")
-  other_mod <- paste(c("modern", "other mod", "other_mod", "fem sci", "sci fem", "scien fem", "other female", "oth fsci", "menstrual regulation", "campo de latex"), collapse = "|") 
+  other_mod <- paste(c("modern", "other mod", "other_mod", "fem sci", "sci fem", "scien fem", "other female", "oth fsci", "menstrual regulation", "campo de latex"), collapse = "|") # TODO: double check sci fem responses (can refer to diaphragm or foams/gels)
   
   # traditional methods
   lam <- paste(c("lactat", "lactan", "amenor", "lam", "mela", "breastf", "allaite", "mama", "prolonged bf", "lact\\. amen\\.",
@@ -695,7 +695,7 @@ extract_data <- function(survey, cur_country) {
     dt[, sexual_violence := d108] 
   } 
   
-  # presence of others during sexual activity section
+  # presence of others during sex activity section
   if ("v815c" %in% names(dt)){
     dt[, woman_pres := v815c]
   }
