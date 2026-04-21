@@ -1,36 +1,19 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
+# Author: NAME
+# Project: ASHER Decomp
 # Purpose: Merge and prep data for cohort survival model
-# Date: 2/27/2024
 # Notes:
 #***************************************************************************
 
 # SET-UP --------------------------------------------------------------------
 
-# clear memory
-rm(list=ls())
-
-# Username is pulled automatically
-username <- Sys.getenv("USER") 
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
 
 # load packages, install if missing
 pacman::p_load(data.table,tidyverse,dplyr,foreign,haven,zoo)
 
 # in/out
-in.dir <- "FILEPATH"
-out.dir <- "FILEPATH"
+in.dir <- 'FILEPATH'
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -44,6 +27,8 @@ get_cmc_month <- function(x) as.integer(x) - 12 * (get_cmc_year(x) - 1900)
 
 # countries to merge/prep files for
 countries <- c("mw", "np", "rw", "gh")
+
+cur_country <- "gh"
 
 # loop through each country to merge
 for (cur_country in countries) {
@@ -150,10 +135,17 @@ for (cur_country in countries) {
       merged_dt_3[month_cmc == cmc_interview_date & event_recode == "pregnancy", preg_id := 0]
       
       # identify women with pregnancy info
-      merged_dt_3[event_recode %in% c("pregnancy","birth","termination"), has_preg_info := !is.na(max(preg_id,na.rm=T)), by = "id_unique"]
+      merged_dt_3[event_recode %in% c("pregnancy","birth","termination"), 
+                  has_preg_info := any(!is.na(preg_id)), 
+                  by = "id_unique"]
       
-      # label all months pregnant with their pregnancy id 
-      merged_dt_3[event_recode %in% c("pregnancy","birth","termination") & has_preg_info == T, preg_id_filled := na.locf(preg_id, fromLast = T), by = "id_unique"]
+
+      # label all months pregnant with their pregnancy id
+      
+      # Apply filling only on desired rows, by group
+      merged_dt_3[event_recode %in% c("pregnancy", "birth", "termination") & has_preg_info == TRUE,
+                  preg_id_filled := na.locf(preg_id, fromLast = TRUE, na.rm = FALSE),
+                  by = id_unique]
       
       # create combined preg_wanted variable from past and current pregnancy
       merged_dt_3[preg_id_filled == 0, preg_desire := preg_wanted_curr]
@@ -206,7 +198,6 @@ for (cur_country in countries) {
     dt[event_recode == "pregnancy", min_cmc_preg := min(month_cmc), by = "id_unique"]
     dt[, min_cmc_preg := min_cmc_preg[!is.na(min_cmc_preg)][1L], by = "id_unique"]  # fill in rest of rows
     dt[month_cmc >= min_cmc_preg, ever_had_intercourse_timevary := 1]
-    
     
     ## education in years
     

@@ -1,33 +1,16 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Prepare variables from woman's file from DHS surveys
-# Date: 10/12/2023
+# Author: NAME
+# Project: ASHER
+# Purpose: Prepare DHS data from WN level file
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
-
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
-pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools)
+pacman::p_load(tidyverse,dplyr,haven,survey,data.table,stringr)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -40,11 +23,12 @@ get_cmc_month <- function(x) as.integer(x) - 12 * (get_cmc_year(x) - 1900)
 # EXTRACT DATA FUNCTION -----------------------------------------------
 
 extract_data <- function(survey, cur_country) {
-
   
   # read in data 
-  dt <- data.table(read_dta(survey))
+  dt <- read_dta(survey) %>% as.data.table()
   
+  # subset to 15-19 to save space
+  dt <- dt[v012 %in% 15:19]
   
   ## SURVEY CHARACTERISTICS ----------------------------------------
   message("||---Survey characteristics")
@@ -128,9 +112,9 @@ extract_data <- function(survey, cur_country) {
   dt[, ever_term := v228]
   dt[, ever_term := ifelse(ever_term == 1, 1, ifelse(ever_term == 0, 0, NA))]
   
-  # date of last pregnany termination (cmc)
+  # date of last pregnancy termination (cmc)
   dt[, cmc_preg_term := v231] # Century month code of the last pregnancy termination.
-  dt[cmc_preg_term %in% c(9998,9999), cmc_preg_term := NA]
+  dt[cmc_preg_term %in% c(9997,9998,9999), cmc_preg_term := NA]
   
   # recall period: difference between interview date and pregnancy termination date
   dt[, term_recall := cmc_interview_date - cmc_preg_term]
@@ -307,11 +291,11 @@ extract_data <- function(survey, cur_country) {
   condom <- paste(c("condom", "condon", "preservati", "camisinha", "codom"), collapse = "|")
   emergency <- paste(c("morning-after", "morning after", "emergenc", "du lendemain", "dia siguiente", "contraception after sex", "^ec$"), collapse = "|")
   patch <- paste(c("patch", "parche"), collapse = "|")
-  ring <- paste(c("contraceptive ring", "vaginal ring", "/ring", "anillo"), collapse = "|")
+  ring <- paste(c("contraceptive ring", "vaginal ring", "FILEPATH", "anillo"), collapse = "|")
   diaphragm <- paste(c("diaphr", "diafrag", "cervical cap", "cones"), collapse = "|")
   foam_gel_sponge <- paste(c("tablet", "foam", "jelly", "jalea", "mousse", "espuma", "creme", "cream", "crema", "gel", "gelee", "spermicid", "eponge", "intravag",
                              "esponja", "esonja", "sponge", "vaginale", "comprimidos vaginais", "vaginal method", "suppository", "vaginals", "metodos vaginal"), collapse = "|")
-  other_mod <- paste(c("modern", "other mod", "other_mod", "fem sci", "sci fem", "scien fem", "other female", "oth fsci", "menstrual regulation", "campo de latex"), collapse = "|") 
+  other_mod <- paste(c("modern", "other mod", "other_mod", "fem sci", "sci fem", "scien fem", "other female", "oth fsci", "menstrual regulation", "campo de latex"), collapse = "|")
   
   # traditional methods
   lam <- paste(c("lactat", "lactan", "amenor", "lam", "mela", "breastf", "allaite", "mama", "prolonged bf", "lact\\. amen\\.",
@@ -695,7 +679,7 @@ extract_data <- function(survey, cur_country) {
     dt[, sexual_violence := d108] 
   } 
   
-  # presence of others during sexual activity section
+  # presence of others during sex activity section
   if ("v815c" %in% names(dt)){
     dt[, woman_pres := v815c]
   }
@@ -727,7 +711,7 @@ extract_data <- function(survey, cur_country) {
                      "desire_child_teen","desire_spacing","desire_limiting","desire_soon","desire_later","desire_spacing_nested","preg_wanted_curr",
                      "ideal_child","ideal_child_nr","any_contra","never_used_contra","current_contra",
                      "current_method","mod_contra","trad_contra","mcpr","need_contra","infecund","last_menses_timing","last_menses_months", 
-                     "preg_not_wantd","menses_not_returned","ppa","unmet_need_dhs","unmet_need","unmet_need_mod","demand_satisfied",
+                     "preg_not_wanted","menses_not_returned","ppa","unmet_need_dhs","unmet_need","unmet_need_mod","demand_satisfied",
                      "ov_cycle_correct","employed","beating_just","fp_exp_radio","fp_exp_tv","fp_exp_newsp","fp_exp_media",
                      "decision_contra","decision_use_respondent","decision_use_partner","decision_use_joint","decision_use_other",
                      "decision_use_joint_respondent","condom_ed","knowledge_mod","fp_source","contra_source_public","contra_source_priv",
@@ -748,32 +732,36 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ---------------------------------------------------
 
 # Cameroon
-extract_data("/FILEPATH/CMR_DHS4_2004_WN.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS5_2011_WN.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS7_2018_2019_WN.DTA", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
 
 # Ghana
-extract_data("/FILEPATH/GHA_DHS4_2003_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS5_2008_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS6_2014_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS8_2022_2023_WN.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 
 # Malawi
-extract_data("/FILEPATH/MWI_DHS4_2000_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS4_2004_2005_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS6_2010_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS7_2015_2016_WN.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Nepal
-extract_data("/FILEPATH/NPL_DHS4_2001_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS5_2006_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS6_2011_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS7_2016_2017_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS8_2022_WN.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Rwanda
-extract_data("/FILEPATH/RWA_DHS4_2000_WN.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS4_2005_WN.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS6_2010_2011_WN.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS7_2014_2015_WN.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS8_2019_2020_WN.DTA", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+
+# India
+extract_data("FILEPATH", "in")
+extract_data("FILEPATH", "in")

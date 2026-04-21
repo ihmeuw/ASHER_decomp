@@ -1,33 +1,17 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Extract GPS and prepare administrative names from DHS surveys
-# Date: 1/19/2024
+# Author: NAME
+# Project: ASHER
+# Purpose: Extract GPS and prepare administrative names
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
 
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
 pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools,sf)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -35,14 +19,17 @@ out.dir <- "FILEPATH"
 # current admin 2 shapefile
 shp2 <- st_read(file.path("FILEPATH"))
 
-
 # EXTRACT DATA FUNCTION -----------------------------------------------
 
 extract_data <- function(survey, cur_country) {
   
-  # read in data 
-  dt <- data.table(read_dta(survey))
-  
+  if (survey == "FILEPATH"){
+    # read in data 
+    dt <- data.table(st_read(survey))
+  } else{
+    # read in data 
+    dt <- data.table(read_dta(survey))
+  }
   
   # SURVEY CHARACTERISTICS --------------------------------------
   message("||---Survey characteristics")
@@ -58,7 +45,6 @@ extract_data <- function(survey, cur_country) {
   dt[, cluster := dhsclust]
   dt[, country := cur_country]
   
-  
   # LATITUDE/LONGITUDE -------------------------------------------
   message("||---GPS Coordinates")
   
@@ -72,7 +58,7 @@ extract_data <- function(survey, cur_country) {
   # MAP ONTO CURRENT SHAPEFILE -----------------------------------
   message("||---Mapping onto current IHME shapefile")
   
-  # full name of current country
+  # ihme_loc_id of current country
   if (cur_country == "cm") country <- "Cameroon"
   if (cur_country == "gh") country <- "Ghana"
   if (cur_country == "mw") country <- "Malawi"
@@ -113,32 +99,34 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ------------------------------------------------
 
 # Cameroon
-extract_data("/FILEPATH/CMR_DHS4_2004_GPS.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS5_2011_GPS.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS7_2018_2019_HHM.DTA", "cm") 
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm") #NOT A DTA BUT EXISTS
 
 # Ghana
-extract_data("/FILEPATH/GHA_DHS4_2003_GPS.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS5_2008_GPS.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS6_2014_GPS.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS8_2022_2023_GPS.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 
 # Malawi
-extract_data("/FILEPATH/MWI_DHS4_2000_GPS.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS4_2004_2005_GPS.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS6_2010_GPS.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS7_2015_2016_GPS.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Nepal
-extract_data("/FILEPATH/NPL_DHS4_2001_GPS.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS5_2006_GPS.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS6_2011_GPS.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS7_2016_2017_GPS.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS8_2022_GPS.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Rwanda
 # no GPS for RWA 2000
-extract_data("/FILEPATH/RWA_DHS4_2005_GPS.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS6_2010_2011_GPS.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS7_2014_2015_GPS.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS8_2019_2020_GPS.DTA", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+
+

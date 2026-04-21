@@ -1,7 +1,7 @@
 *==============================================================================
 * Title: ASHER Oaxaca-Blinder analysis for DHS data
-* Date: March 21, 2024
-* Description: This do file conducts an Oaxaca-Blinder analysis for 5 countries using two years of data (baseline and endline): part 2, outcome of any birth or pregnancy among women who have had sex 
+* Author: NAME
+* Description: This do file conducts an Oaxaca-Blinder analysis for 4 countries using two years of data (baseline and endline): part 2, outcome of any birth or pregnancy among women who have had sex 
 *
 * Data Source: DHS surveys 
 * Notes: 
@@ -13,7 +13,7 @@
 clear
 
 ** change this filepath to in date 
-cd "filepath"
+cd "FILEPATH"
 
 import delimited ob_input_prepped_df_dhs.csv
 save full_data.dta, replace
@@ -24,7 +24,7 @@ egen country_round = concat(country year), punct(" ")
 foreach country_code in  "gh" "cm" "np" "rw" {
 	clear
 	** change this filepath to in date 
-cd "filepath"
+	cd "FILEPATH"
 
 	use full_data.dta
 
@@ -37,7 +37,7 @@ cd "filepath"
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -48,7 +48,7 @@ gen file_name_ci = "alt_dhs_oaxaca_15_24_ci_detail_part_2_" +  "`country_code'" 
 local file_name_ci = file_name_ci[1]
 
 ** cd to outdir: change this date to today's date
-cd "filepath"
+cd "FILEPATH"
 
 * store coefficients
 esttab test using "`file_name_coef'", cells(b)  replace
@@ -56,7 +56,7 @@ esttab test using "`file_name_coef'", cells(b)  replace
 esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just 
 
 estimates store test_pooled
 
@@ -68,7 +68,7 @@ esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 
 * regress endline only
 keep if baseline == 0
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just  
 
 estimates store test_endline
 
@@ -87,7 +87,7 @@ esttab test_endline using "`file_name_ci_endline'", ci(4) replace
 foreach country_code in   "gh" "cm" "np" "rw"  {
 	clear
 	** change this filepath to in date 
-	cd "filepath"
+	cd "FILEPATH"
 
 	use full_data.dta
 	
@@ -100,7 +100,7 @@ foreach country_code in   "gh" "cm" "np" "rw"  {
 	
 	svyset psu_unique [pweight=pweight]
 
-oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
+oaxaca any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp  curr_cohabit  unmet_need wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just, by(baseline) categorical(wealth_dummies1 wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5) weight(1) detail svy noisily relax
 
 estimates store test
 
@@ -111,7 +111,7 @@ gen file_name_ci = "alt_dhs_oaxaca_15_19_ci_detail_part_2_" +  "`country_code'" 
 local file_name_ci = file_name_ci[1]
 
 ** cd to outdir: change this date to today's date
-cd "filepath"
+cd "FILEPATH"
 
 * store coefficients
 esttab test using "`file_name_coef'", cells(b)  replace
@@ -119,7 +119,8 @@ esttab test using "`file_name_coef'", cells(b)  replace
 esttab test using "`file_name_ci'", ci(4) replace
 
 * regress pooled 
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just 
+
 estimates store test_pooled
 
 gen file_name_ci_test = "alt_dhs_oaxaca_15_19_ci_detail_test_part_2_" +  "`country_code'" + ".csv"
@@ -128,9 +129,11 @@ local file_name_ci_test = file_name_ci_test[1]
 * store confidence intervals
 esttab test_pooled using "`file_name_ci_test'", ci(4) replace
 
+
 * regress endline only
 keep if baseline == 0
-svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5  
+svy: regress any_birth_preg_2_yr_dhs  age educ_single_yrs age_1st_sex_imp curr_cohabit  unmet_need wealth_dummies2 wealth_dummies3 wealth_dummies4 wealth_dummies5 beating_just  
+
 estimates store test_endline
 
 gen file_name_ci_endline = "alt_dhs_oaxaca_15_19_ci_detail_endline_part_2_" +  "`country_code'" + ".csv"
@@ -138,6 +141,8 @@ local file_name_ci_endline = file_name_ci_endline[1]
 
 * store confidence intervals
 esttab test_endline using "`file_name_ci_endline'", ci(4) replace
+
+
 }
 
 

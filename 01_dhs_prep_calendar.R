@@ -1,26 +1,12 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Process contraceptive calendar data from DHS surveys
-# Date: 2/27/2024
+# Author: NAME
+# Project: ASHER Decomp
+# Purpose: Process DHS contraceptive calendar data
 # Notes:
 #***************************************************************************
 
 # SET-UP --------------------------------------------------------------------
 
-# clear memory
-rm(list=ls())
-
-# Username is pulled automatically
-username <- Sys.getenv("USER") 
-
-# runtime configuration
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-}
 
 # load packages, install if missing
 pacman::p_load(data.table,tidyverse,dplyr,foreign,haven)
@@ -119,13 +105,15 @@ extract_data <- function(survey, cur_country) {
     expand <- CJ(id_unique = calendar[calendar_starts == cal_start]$id_unique, month_num = month_nums)
     tmp <- merge(calendar, expand, by = "id_unique")
     
+    # create columns with real and cmc dates
+    tmp[, month := months[month_num]]
+    tmp[, month_cmc := months_cmc[month_num]]
+    
     # add onto calendar_long
     calendar_long <- rbind(calendar_long, tmp, fill = T)
   }
  
-  # create column with real and cmc dates and remove empty rows after the interview month
-  calendar_long[, month := months[month_num]]
-  calendar_long[, month_cmc := months_cmc[month_num]]
+  # remove empty rows after the interview month
   calendar_long <- calendar_long[month_cmc <= cmc_interview_date]
   
   # parse out the corresponding contraceptive use/birth events
@@ -238,23 +226,23 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ---------------------------------------------------
 
 # Nepal
-extract_data("/FILEPATH/NPL_DHS5_2006_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS6_2011_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS7_2016_2017_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS8_2022_WN.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Ghana
-extract_data("/FILEPATH/GHA_DHS5_2008_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS6_2014_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS8_2022_2023_WN.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 
 # Malawi
-extract_data("/FILEPATH/MWI_DHS4_2004_2005_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS6_2010_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS7_2015_2016_WN.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Rwanda
-extract_data("/FILEPATH/RWA_DHS6_2010_2011_WN.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS7_2014_2015_WN.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS8_2019_2020_WN.DTA", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
 

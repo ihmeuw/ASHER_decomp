@@ -1,32 +1,17 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Prepare variables from woman's file from MICS surveys
+# Author: NAME
+# Project: ASHER
+# Purpose: Prepare MICS data from WN level file
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
 
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
 pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -105,7 +90,6 @@ extract_data <- function(survey, cur_country) {
   message("||---Outcome-related variables")
   
   # currently pregnant
-  # NOTE: CMR 2000 has a currently married gateway prior to asking if currently pregnant
   dt[, curr_preg := ifelse(grepl("RWA_MICS2", survey), wi5, 
                                    ifelse(grepl("CMR_MICS2", survey), cu2, cp1))]
   dt[, curr_preg := ifelse(curr_preg == 1, 1, ifelse(curr_preg %in% c(2,8), 0, NA))]   # recode to 0/1 
@@ -189,6 +173,13 @@ extract_data <- function(survey, cur_country) {
   
   if (grepl("MICS3", survey)) dt[, age_first_cohabit := agem]
   if (grepl("MICS[4-6]", survey)) dt[, age_first_cohabit := wagem]
+
+
+  # # literacy
+  # # currently not needed, but if so (rwa 2000 = hl8? mics 3 = wm14, mics4/5 = wb7, mics 6 = wb14)
+  # dt[, no_read := ifelse(wb14 == 0, 1, 0) ]
+  # dt[wb14==3, no_read := NA]
+  # dt[wb14 == 4, no_read:= NA]
 
   # education
   if ("melevel" %in% names(dt)) dt[, edu_level_categ_wn := as.character(as_factor(melevel))] 
@@ -471,15 +462,15 @@ extract_data <- function(survey, cur_country) {
     # set infecund to 1 if has not had a birth in the preceding 5 years, has never used contraception (or is not using if never not avail),
     # and is currently married and was continuously married during the preceding 5 years (can only determine if in first marriage/union)
     if ("never_used_contra" %in% names(dt)) {
-      dt[curr_cohabit == 1 &                                             # currently married/in-union
-           never_used_contra == 1 &                                      # never used contraception
-           in_first_cohabit == 1 &                                       # in first marriage/union
+      dt[curr_cohabit == 1 &                                            # currently married/in-union
+           never_used_contra == 1 &                                     # never used contraception
+           in_first_cohabit == 1 &                                      # in first marriage/union
            cmc_interview_date - cmc_last_child >= 60 &                   # no births in last 5 years
            cmc_interview_date - cmc_first_cohabit >= 60, infecund := 1]  # been married continuously in last 5 years
     } else {
-      dt[curr_cohabit == 1 &                                             # currently married/in-union
-           any_contra == 0 &                                             # currently not using contraception
-           in_first_cohabit == 1 &                                       # in first marriage/union
+      dt[curr_cohabit == 1 &                                            # currently married/in-union
+           any_contra == 0 &                                            # currently not using contraception
+           in_first_cohabit == 1 &                                      # in first marriage/union
            cmc_interview_date - cmc_last_child >= 60 &                   # no births in last 5 years
            cmc_interview_date - cmc_first_cohabit >= 60, infecund := 1]  # been married continuously in last 5 years
     }
@@ -572,7 +563,7 @@ extract_data <- function(survey, cur_country) {
                      "fert_pref_notpreg","fertility_pref","desire_unit","desire_timing","desire_child_teen","desire_spacing",
                      "desire_limiting","desire_soon","desire_spacing_nested","desire_later","any_contra","never_used_contra",
                      "current_method","mod_contra","trad_contra","mcpr","need_contra","infecund","last_menses_unit", 
-                     "last_menses_timing","last_menses_months","preg_not_wantd","menses_not_returned","ppa","unmet_need","unmet_need_mod",
+                     "last_menses_timing","last_menses_months","preg_not_wanted","menses_not_returned","ppa","unmet_need","unmet_need_mod",
                      "demand_satisfied")
 
   cur_vars <- names(dt)[names(dt) %in% vars_interest]
@@ -593,24 +584,24 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ---------------------------------------------------
 
 # Cameroon
-extract_data("/FILEPATH/CMR_MICS2_2000_WN.DTA", "cm")
-extract_data("/FILEPATH/CMR_MICS3_2006_WN.DTA", "cm")
-extract_data("/FILEPATH/CMR_MICS5_2014_WN.DTA", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
 
 # Nepal
-extract_data("/FILEPATH/NPL_MICS4_2010_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_MICS5_2014_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_MICS6_2019_WN.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Malawi
-extract_data("/FILEPATH/MWI_MICS3_2006_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_MICS5_2013_2014_WN.DTA", "mw")
-extract_data("/FILEPATH/MWI_MICS6_2019_2020_WN.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Ghana
-extract_data("/FILEPATH/GHA_MICS3_2006_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_MICS4_2011_WN.DTA", "gh")
-extract_data("/FILEPATH/GHA_MICS6_2017_2018_WN.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 
 # Rwanda
-extract_data("/FILEPATH/RWA_MICS2_2000_WN.DTA", "rw")
+extract_data("FILEPATH", "rw")

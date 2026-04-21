@@ -1,33 +1,17 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Extract school attendance from household member file from DHS surveys 
-# Date: 1/19/2024
+# Author: NAME
+# Project: ASHER
+# Purpose: Extract school attendance from HHM file 
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
 
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
-pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools)
+pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools,data.table)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -115,32 +99,38 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ---------------------------------------------------
 
 # Cameroon
-extract_data("/FILEPATH/CMR_DHS4_2004_HHM.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS5_2011_HHM.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS7_2018_2019_HHM.DTA", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
 
 # Ghana
-extract_data("/FILEPATH/GHA_DHS4_2003_HHM.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS5_2008_HHM.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS6_2014_HHM.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS8_2022_2023_HHM.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 
 # Malawi
-extract_data("/FILEPATH/MWI_DHS4_2000_HHM.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS4_2004_2005_HHM.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS6_2010_HHM.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS7_2015_2016_HHM.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Nepal
-extract_data("/FILEPATH/NPL_DHS4_2001_HHM.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS5_2006_HHM.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS6_2011_HHM.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS7_2016_2017_HHM.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS8_2022_HHM.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Rwanda
-extract_data("/FILEPATH/RWA_DHS4_2000_HHM.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS4_2005_HHM.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS6_2010_2011_HHM.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS7_2014_2015_HHM.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS8_2019_2020_HHM.DTA", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+
+# India
+extract_data("FILEPATH", "in")
+extract_data("FILEPATH", "in")
+extract_data("FILEPATH", "in")
+

@@ -1,33 +1,17 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Prepare variables from woman's file from MICS surveys
-# Date: 1/9/2024
+# Author: NAME
+# Project: ASHER
+# Purpose: Prepare MICS data from WN level file
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
 
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
 pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -140,18 +124,18 @@ extract_data <- function(survey, cur_country){
 # RUN EXTRACTIONS ---------------------------------------------------
 
 # Cameroon
-extract_data("/FILEPATH/CMR_MICS5_2014_BH.DTA", "cm")
+extract_data("FILEPATH", "cm")
 
 # Nepal
-extract_data("/FILEPATH/NPL_MICS5_2014_BH.DTA", "np")
-extract_data("/FILEPATH/NPL_MICS6_2019_BH.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Malawi
-extract_data("/FILEPATH/MWI_MICS3_2006_BH.DTA", "mw")
-extract_data("/FILEPATH/MWI_MICS5_2013_2014_BH.DTA", "mw")
-extract_data("/FILEPATH/MWI_MICS6_2019_2020_BH.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Ghana
-extract_data("/FILEPATH/GHA_MICS4_2011_BH.DTA", "gh")
-extract_data("/FILEPATH/GHA_MICS6_2017_2018_BH.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 

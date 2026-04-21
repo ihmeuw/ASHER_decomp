@@ -1,33 +1,17 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Extract pregnancy histories from DHS surveys
-# Date: 3/26/2024
+# Author: NAME
+# Project: ASHER
+# Purpose: Extract pregnancy histories
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
 
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
 pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools,sf)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -233,11 +217,11 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ------------------------------------------------
 
 # Ghana
-extract_data("/FILEPATH/GHA_DHS8_2022_2023_PGR_GHGR8AFL_Y2024M01D22.DTA", "gh")
+extract_data("FILEPATH", "gh")
 
 # Nepal
-extract_data("/FILEPATH/NPL_DHS4_2001_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS5_2006_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS6_2011_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS7_2016_2017_WN.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS8_2022_PGR.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")

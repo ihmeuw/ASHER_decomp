@@ -1,34 +1,18 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
+# Author: NAME
+# Project: ASHER
 # Purpose: Merge extracted MICS wn, hh, hhm, bh, and wealth quintile files
-# Date: 1/10/2024
 # Notes:
 #***************************************************************************
 
 # SET-UP -----------------------------------------------------------
 
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
-
 # load packages
-pacman::p_load(data.table,magrittr,tidyverse,parallel,plyr,dplyr,haven,survey)
+pacman::p_load(data.table,magrittr,tidyverse,parallel,ggrepel,plyr,viridis,scales,ggridges,openxlsx,readxl,ggpubr,dplyr,RColorBrewer,haven,survey)
 
 # in/out
-in.dir <- "FILEPATH"
-out.dir <- "FILEPATH"
+in.dir <- 'FILEPATH'
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')

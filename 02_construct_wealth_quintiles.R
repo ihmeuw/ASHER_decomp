@@ -1,40 +1,24 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Create country-specific wealth index quintiles through PCA
-# Date: 11/16/23
+# Author: NAME
+# Project: ASHER
+# Purpose: Create country-specific wealth quintiles through PCA
 # Notes:
 #***************************************************************************
 
 # SET-UP ----------------------------------------------------------
 
-# clear memory
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
 # load packages
 pacman::p_load(data.table,magrittr,tidyverse,parallel,plyr,scales,ggridges,dplyr,haven,survey,readstata13,zoo,corrplot)
 
 # in/out
-in.dir <- "FILEPATH"
-out.dir <- "FILEPATH"
+in.dir <- 'FILEPATH'
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
 
 # countries to create wealth index for
 countries <- c("cm", "gh", "mw", "np", "rw")
-
 
 # PROCESS WEALTH QUINTILE FUNCTION ---------------------------------
 
@@ -53,13 +37,13 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   if (baseline_endline == T) {
     
     # update out_dir
-    out.dir <- "FILEPATH"
+    out.dir <- 'FILEPATH'
     
     # subset files
     if (cur_country == "rw") files <- files[grepl("DHS4_2000|DHS8_2019", files)]
     if (cur_country == "gh") files <- files[grepl("DHS4_2003|DHS8_2022", files)]
     if (cur_country == "np") files <- files[grepl("DHS5_2006|DHS8_2022", files)]
-    if (cur_country == "mw") files <- files[grepl("DHS4_2000|MICS6_2019", files)]
+    if (cur_country == "mw") files <- files[grepl("DHS4_2000|MICS6_2019|DHS7_2015_2016", files)]
     if (cur_country == "cm") files <- files[grepl("DHS4_2004|DHS7_2018", files)]
   }
   
@@ -67,7 +51,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   if (cohort == T) {
     
     # update out_dir
-    out.dir <- "FILEPATH"
+    out.dir <- 'FILEPATH'
     
     # subset files
     if (cur_country == "rw") files <- files[grepl("DHS6_2010|DHS7_2014|DHS8_2019", files)]
@@ -92,6 +76,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   data_avail_all <- dcast(melt(data_avail_all, id.vars = "survey"), formula = variable ~ survey)
   write.csv(data_avail_all, file.path(out.dir, paste0(cur_country, "_data_availability_all_vars.csv")), row.names = F)
   
+  
   # list of variables to test PCA
   possible_vars <- c("survey", "hhid_unique", "memsleep", "electricity", "radio", "fridge", "bike", "moto", "car",
                      "land_ph", "mobile_ph", "watch", "animal_cart", "motor_boat", "internet",
@@ -110,6 +95,7 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   data_avail_test <- data_test[, lapply(.SD, function(x) sum(!is.na(x))/.N), by = "survey"]
   data_avail_test <- dcast(melt(data_avail_test, id.vars = "survey"), formula = variable ~ survey)
   write.csv(data_avail_test, file.path(out.dir, paste0(cur_country, "_data_availability_test_vars.csv")), row.names = F)
+  
   
   # visualize data availability heat map
   plot_dt <- melt(data_avail_test, id.vars = "variable", variable.name = "survey")
@@ -228,7 +214,6 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
                         suppdf, fill=T)
     
     # Only include positive weights, rescale to 1
-    #  loadingsdf <- loadingsdf[comp_loading > 0, var_weight := comp_loading / sum(comp_loading)]
     loadingsdf[var_names != "variance explained", var_weight := comp_loading / sum(comp_loading)]
     
     return(loadingsdf)
@@ -294,7 +279,9 @@ process_wealth_quintile <- function(cur_country, baseline_endline = F, cohort = 
   }
  
   
-  # EXPORT RESULTS ---------------------------------------------
+    
+  
+  # VISUALIZE RESULTS ---------------------------------------------
   
   # save constructed wealth scores and quintiles
   write.csv(wealth_dt, file.path(out.dir, paste0(cur_country, "_wealth_quintile_estimates.csv")), row.names = FALSE)

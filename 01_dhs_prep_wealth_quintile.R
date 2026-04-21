@@ -1,36 +1,17 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
-# Purpose: Extract components of the wealth index from DHS surveys
-# Date: 10/20/2023
+# Author: NAME
+# Project: ASHER
+# Purpose: DHS wealth quintile prep code
 # Notes:
 #***************************************************************************
 
-# Sourced from 2016 time stamp page: https://dhsprogram.com/topics/wealth-index/Wealth-Index-Construction.cfm
-# Rustein article with SPSS code: https://dhsprogram.com/programming/wealth%20index/Steps_to_constructing_the_new_DHS_Wealth_Index.pdf
-
 # SET-UP -----------------------------------------------------------
-
-# clear environment
-rm(list=ls())
-username <- Sys.info()[["user"]]
-
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
 
 # load packages
 pacman::p_load(magrittr,tidyverse,parallel,plyr,dplyr,haven,survey,tools,devtools)
 
 # in/out
-out.dir <- "FILEPATH"
+out.dir <- 'FILEPATH'
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -118,7 +99,7 @@ extract_data <- function(survey, cur_country) {
   if ("hv246" %in% names(df)) dt[, any_livestock := ifelse(hv246 == 1, 1, ifelse(hv246 == 0, 0, NA))]
   
   # generate continuous counts
-  # these are the standardized livestock variables, beyond 'f' can vary
+  # these are the standardized livestock variables, beyond f can vary
   if ("hv246a" %in% names(dt)) dt[, cattle_only := as.integer(hv246a > 0)]
   if ("hv246b" %in% names(dt)) dt[, cows_only := as.integer(hv246b > 0)]
   if ("hv246c" %in% names(dt)) dt[, horse_donk := as.integer(hv246c > 0)]
@@ -455,32 +436,32 @@ extract_data <- function(survey, cur_country) {
 # RUN EXTRACTIONS ---------------------------------------------------
 
 # Cameroon
-extract_data("/FILEPATH/CMR_DHS4_2004_HH.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS5_2011_HH.DTA", "cm")
-extract_data("/FILEPATH/CMR_DHS7_2018_2019_HH.DTA", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
+extract_data("FILEPATH", "cm")
 
 # Ghana
-extract_data("/FILEPATH/GHA_DHS4_2003_HH.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS5_2008_HH.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS6_2014_HH.DTA", "gh")
-extract_data("/FILEPATH/GHA_DHS8_2022_2023_HH.DTA", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
+extract_data("FILEPATH", "gh")
 
 # Malawi
-extract_data("/FILEPATH/MWI_DHS4_2000_HH.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS4_2004_2005_HH.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS6_2010_HH.DTA", "mw")
-extract_data("/FILEPATH/MWI_DHS7_2015_2016_HH.DTA", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
+extract_data("FILEPATH", "mw")
 
 # Nepal
-extract_data("/FILEPATH/NPL_DHS4_2001_HH.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS5_2006_HH.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS6_2011_HH.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS7_2016_2017_HH.DTA", "np")
-extract_data("/FILEPATH/NPL_DHS8_2022_HH.DTA", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
+extract_data("FILEPATH", "np")
 
 # Rwanda
-extract_data("/FILEPATH/RWA_DHS4_2000_HH.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS4_2005_HH.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS6_2010_2011_HH.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS7_2014_2015_HH.DTA", "rw")
-extract_data("/FILEPATH/RWA_DHS8_2019_2020_HH.DTA", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")
+extract_data("FILEPATH", "rw")

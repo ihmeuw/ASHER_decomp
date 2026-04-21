@@ -1,37 +1,23 @@
 #-------------------Header------------------------------------------------
-# Project: IHME ASHER Decomposition
+# Author: NAME
+# Project: ASHER Decomp
 # Purpose: Run cohort survival analysis
-# Date: 2/28/2024
 # Notes:
 #***************************************************************************
 
 # SET-UP ---------------------------------------------------------------
 
-# clear memory
-rm(list=ls())
-
-# Username is pulled automatically
-username <- Sys.getenv("USER") 
-
-# runtime configuration
-if (Sys.info()["sysname"] == "Linux") {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-} else {
-  j <- "FILEPATH"
-  h <- "FILEPATH"
-  r <- "FILEPATH"
-  l <- "FILEPATH"
-}
 
 # load packages, install if missing
 pacman::p_load(data.table,tidyverse,parallel,plyr,dplyr,haven,survey,tools,survival,ggfortify)
 
 # in/out
-in.dir <- "FILEPATH"
-out.dir <- "FILEPATH"
+in.dir <- 'FILEPATH'
+out.dir <- 'FILEPATH'
+out.dir <- file.path(out.dir, Sys.Date())
+#out.dir <- file.path(out.dir, '2025-10-13')
+
+dir.create(out.dir, showWarnings = F)
 
 # create function for the opposite of %in%
 '%ni%' <- Negate('%in%')
@@ -50,9 +36,6 @@ get_cmc_month <- function(x) as.integer(x) - 12 * (get_cmc_year(x) - 1900)
 # list csv files in prepped directory
 files <- list.files(in.dir, pattern = ".csv")
 
-# OPTIONAL: subset to files for country of interest
-# files <- files[grepl("np", tolower(files))]
-
 # read in and combine data
 dt <- rbindlist(lapply(file.path(in.dir, files), fread), fill = T)
 
@@ -68,19 +51,60 @@ analysis_vars <- c("survey","country","cluster","id_unique","pweight","admin_1",
                    "preg_desire","preg_desire_then","preg_desire_later","preg_desire_not_at_all")
 dt_analysis <- dt[, analysis_vars[analysis_vars %in% names(dt)], with = F]
 
-# OPTIONAL: remove full dt to save memory space
 remove(dt)
+
+# create every had intercourse time_vary only among unmarried women
+# if unmarried, use ever_had_intercourse_timevary
+dt_analysis[curr_cohabit_timevary == 0, ever_had_intercourse_timevary_unmarried := ever_had_intercourse_timevary]
+# if married, set to 0 because only among unmarried 
+dt_analysis[curr_cohabit_timevary == 1, ever_had_intercourse_timevary_unmarried := 0]
+
+# create lagged contraceptive variables
+dt_analysis[, mod_contra_lag_1m := lead(mod_contra), by = c("survey", "id_unique")]                                          # use 1 month ago
+dt_analysis[, any_contra_lag_1m := lead(any_contra), by = c("survey", "id_unique")]
+
+dt_analysis[, mod_contra_lead_1m := lag(mod_contra), by = c("survey", "id_unique")]                                          # use 1 month in future
+dt_analysis[, any_contra_lead_1m := lag(any_contra), by = c("survey", "id_unique")]
+
+# create past contraceptive use variables
+dt_analysis[, mod_contra_past_2m := mod_contra + lead(mod_contra), by = c("survey", "id_unique")]                            # use in last 2 month
+dt_analysis[mod_contra_past_2m >= 1, mod_contra_past_2m := 1]
+
+dt_analysis[, mod_contra_past_3m := mod_contra + lead(mod_contra) + lead(mod_contra, n = 2), by = c("survey", "id_unique")]   # use in last 3 months
+dt_analysis[mod_contra_past_3m >= 1, mod_contra_past_3m := 1]
+
+# create 1 momth lag contraception nested variables
+dt_analysis[, method_info_idx_lag_1m := lead(method_info_idx_timevary), by = c("survey", "id_unique")]
+dt_analysis[, decision_use_joint_respondent_lag_1m := lead(decision_use_joint_respondent_timevary), by = c("survey", "id_unique")]
 
 # create grouped education
 # no education, currently attending, not attend - primary, some secondary, secondary
 dt_analysis[attend_school_timevary == 0, ed_level := ifelse(educ_yrs_timevary >= 12, "Not attending: completed secondary",
                                                                    ifelse(educ_yrs_timevary < 12, "Not attending: less than secondary", NA))]
-dt_analysis[attend_school_timevary == 0 & educ_yrs_timevary == 0, ed_level := "No education"]
+#dt_analysis[attend_school_timevary == 0 & educ_yrs_timevary == 0, ed_level := "No education"]
 dt_analysis[attend_school_timevary == 1, ed_level := "Currently attending"]
 
 # set education ref group
 dt_analysis$ed_level <- factor(dt_analysis$ed_level)
 dt_analysis$ed_level <- relevel(dt_analysis$ed_level, ref = "Not attending: less than secondary")
+
+# create country-specific grouped ed levels
+
+# 8-4 systems
+dt_analysis[country %in% c("np","mw") & attend_school_timevary == 0, ed_level_custom := ifelse(educ_yrs_timevary >= 12, "Not attending: completed secondary",
+                                                                                                   ifelse(educ_yrs_timevary > 8, "Not attending: some secondary", 
+                                                                                                          ifelse(educ_yrs_timevary == 8, "Not attending: completed primary", 
+                                                                                                                 ifelse(educ_yrs_timevary > 0, "Not attending: some primary", NA))))]
+dt_analysis[country %in% c("np","mw") & attend_school_timevary == 0 & educ_yrs_timevary == 0, ed_level_custom := "No education"]
+dt_analysis[country %in% c("np","mw") & attend_school_timevary == 1, ed_level_custom := "Currently attending"]
+
+# 6-3-3 system
+dt_analysis[country %in% c("rw") & attend_school_timevary == 0, ed_level_custom := ifelse(educ_yrs_timevary >= 12, "Not attending: completed secondary",
+                                                                                                   ifelse(educ_yrs_timevary > 6, "Not attending: some secondary", 
+                                                                                                          ifelse(educ_yrs_timevary == 6, "Not attending: completed primary", 
+                                                                                                                 ifelse(educ_yrs_timevary > 0, "Not attending: some primary", NA))))]
+dt_analysis[country %in% c("rw") & attend_school_timevary == 0 & educ_yrs_timevary == 0, ed_level_custom := "No education"]
+dt_analysis[country %in% c("rw") & attend_school_timevary == 1, ed_level_custom := "Currently attending"]
 
 # create binary out of ideal children
 dt_analysis[, wants_children := ifelse(ideal_child > 0, 1, 0)]
@@ -102,6 +126,13 @@ dt_analysis[method_fail_lag_1m == 1 & lead(any_contra) == 1, any_contra_inc_fail
 
 dt_analysis[any_contra_inc_fail == 1, event_recode_failed := lead(event_recode), by = c("survey","id_unique")]
 dt_analysis[method_fail_lag_1m == 0, event_recode_failed := NA]
+
+# adjust method info idx and decision making to account for failure
+dt_analysis[, mii_inc_fail := method_info_idx_timevary]
+dt_analysis[method_fail_lag_1m == 1, mii_inc_fail := method_info_idx_lag_1m]
+
+dt_analysis[, decision_use_inc_fail := decision_use_joint_respondent_timevary]
+dt_analysis[method_fail_lag_1m == 1, decision_use_inc_fail := decision_use_joint_respondent_lag_1m]
 
 # create grouped contra use by method type 
 dt_analysis[any_contra_inc_fail == 0, current_contra_type := "No method"]
@@ -198,6 +229,8 @@ dt_analysis_first_sex_p1 <- dt_analysis_first_sex_p1[age_1st_sex_imp >= age_star
 dt_analysis_first_sex_p2 <- dt_analysis[month_cmc >= first_sex_cmc]
 dt_analysis_first_sex_p2 <- dt_analysis_first_sex_p2[age_1st_sex_imp >= age_start]
 
+# create unique cluster
+dt_analysis[, psu_unique := paste(country, year, cluster)]
 
 
 # SURVIVAL CURVES ------------------------------------------------------
@@ -222,6 +255,29 @@ fit <- survfit(Surv(tstart, tstop, event_first_preg) ~ 1, data = dt_analysis[cou
 autoplot(fit, ylab = "No pregnancy", xlab = "Time (Months)", conf.int = F) + theme_bw() + theme(legend.title = element_blank())
 ggsave(file.path(out.dir, "RWA_survival_curve.png"), width = 8, height = 5)
 
+# all at once
+# Ghana
+fit <- survfit(Surv(tstart, tstop, event_first_preg) ~ 1, data = dt_analysis[country == "gh"], weights = pweight)
+gh_plot <- autoplot(fit, ylab = "No pregnancy", xlab = "Time (Months)", conf.int = F) + theme_bw() + ggtitle("Ghana") + 
+  theme(legend.title = element_blank(), plot.title = element_text(hjust = 0.5), text = element_text(size =18)) 
+
+# Malawi
+fit <- survfit(Surv(tstart, tstop, event_first_preg) ~ 1, data = dt_analysis[country == "mw"], weights = pweight)
+mw_plot <- autoplot(fit, ylab = "No pregnancy", xlab = "Time (Months)", conf.int = F) + theme_bw() + ggtitle("Malawi") + 
+  theme(legend.title = element_blank(), plot.title = element_text(hjust = 0.5), text = element_text(size =18)) 
+
+# Nepal
+fit <- survfit(Surv(tstart, tstop, event_first_preg) ~ 1, data = dt_analysis[country == "np"], weights = pweight)
+np_plot <- autoplot(fit, ylab = "No pregnancy", xlab = "Time (Months)", conf.int = F) + theme_bw() + ggtitle("Nepal") + 
+  theme(legend.title = element_blank(), plot.title = element_text(hjust = 0.5), text = element_text(size =18)) 
+
+# Rwanda
+fit <- survfit(Surv(tstart, tstop, event_first_preg) ~ 1, data = dt_analysis[country == "rw"], weights = pweight)
+rw_plot <- autoplot(fit, ylab = "No pregnancy", xlab = "Time (Months)", conf.int = F) + theme_bw() + ggtitle("Rwanda") + 
+  theme(legend.title = element_blank(), plot.title = element_text(hjust = 0.5), text = element_text(size =18)) 
+
+ggarrange(gh_plot, mw_plot, np_plot, rw_plot, ncol = 2, nrow = 2)
+ggsave(file.path(out.dir, "all_countries_survival_curve.png"), width = 16, height = 10)
 
 
 # TEST MODELS ----------------------------------------------------------
@@ -231,9 +287,11 @@ ggsave(file.path(out.dir, "RWA_survival_curve.png"), width = 8, height = 5)
 # wealth_quintiles was made via PCA with all DHS/MICS data, should be rerun with only included surveys to be accurate
 
 test_models <- function(cur_country = "") {
-  
+  print(cur_country)
   # empty table to store coefficients
   coefs <- data.table()
+  # empy table to store values from cox.zph test for proportional hazards assumption
+  cox_zph <- data.table()
   
   # corresponding country ihme_loc_id
   if (cur_country == "gh") ihme_loc_id <- "GHA"
@@ -244,12 +302,38 @@ test_models <- function(cur_country = "") {
   # save country cohort data
   write.csv(dt_analysis[country == cur_country], file.path(out.dir, paste0(ihme_loc_id, "_model_cohort.csv")), row.names = F)
   
-  # adjust mod contra for method failure, categorical ed_level
+  # Define the complex survey design (replace 'cluster_var' and 'strata_var' with your actual column names)
+  # unique psu for each nid
+  dhs_design <- svydesign(id = ~psu_unique, 
+                          weights = ~pweight, 
+                          data = dt_analysis[country == cur_country], 
+                          nest = TRUE)
+  # survey-weighted: adjust mod contra for method failure, try categorical ed_level
+  fit1_svy <- svycoxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
+                         curr_cohabit_timevary + ever_had_intercourse_timevary_unmarried + ed_level + mod_contra_inc_fail + beating_just, 
+                       design = dhs_design)
+  
+  summary(fit1_svy)
+  
+  tmp <- summary(fit1_svy)$coefficients %>% as.data.table(keep.rownames = T)
+  tmp[, model := "survey-weighted no contra lag, inc method failure, categorical education"]
+  tmp[, country := cur_country]
+  write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_survey_weighted_all_contra_inc_fail_ed_level.csv")), row.names = F)
+  coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
+  
+  
+  # adjust mod contra for method failure, try categorical ed_level
   fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
-                     curr_cohabit_timevary + ever_had_intercourse_timevary + ed_level + mod_contra_inc_fail + 
-                     beating_just,
-                   data = dt_analysis[country == cur_country], weights = pweight)
+                     curr_cohabit_timevary + ever_had_intercourse_timevary_unmarried + ed_level + mod_contra_inc_fail + 
+                     beating_just,data = dt_analysis[country == cur_country], weights = pweight)
+  
   summary(fit1_v1)
+  
+  # Test the proportional hazards assumption
+  ph_test <- survival::cox.zph(fit1_v1)
+  
+  # save the results
+  cox_zph <- rbind(cox_zph, data.table(country = cur_country, model = "no contra lag, inc method failure, categorical education",variable =  rownames(ph_test$table), ph_test$table), fill = T)
   
   tmp <- summary(fit1_v1)$coefficients %>% as.data.table(keep.rownames = T)
   tmp[, model := "no contra lag, inc method failure, categorical education"]
@@ -257,59 +341,98 @@ test_models <- function(cur_country = "") {
   write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_all_contra_inc_fail_ed_level.csv")), row.names = F)
   coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
   
-  # method type accounting for failure, categorical ed_level
-  fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
-                     ever_had_intercourse_timevary + ed_level + curr_cohabit_timevary + as.factor(current_contra_type) + 
-                     beating_just,
-                   data = dt_analysis[country == cur_country], weights = pweight)
+  # RTR: try taking out beating just and wealth since they are not truly time fixed but we can't capture time-varying versions of them
+  fit1_v1 <- svycoxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban+mean_yrs_schooling_head +
+                     curr_cohabit_timevary + ever_had_intercourse_timevary_unmarried + ed_level + mod_contra_inc_fail
+                     , design = dhs_design)
   summary(fit1_v1)
   
   tmp <- summary(fit1_v1)$coefficients %>% as.data.table(keep.rownames = T)
-  tmp[, model := "contra type inc fail, categorical education"]
+  tmp[, model := "RTR no wealth or beating just"]
   tmp[, country := cur_country]
-  write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_all_contra_type_inc_fail_ed_level.csv")), row.names = F)
+  write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_rtr_time_fixed_drop.csv")), row.names = F)
   coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
   
-  # method subtype accounting for failure, categorical ed_level
+  # non survey weighted so we can look at ph assumption 
+  # RTR: try taking out beating just and wealth since they are not truly time fixed but we can't capture time-varying versions of them
+  fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + mean_yrs_schooling_head +
+                        curr_cohabit_timevary + ever_had_intercourse_timevary_unmarried + ed_level + mod_contra_inc_fail
+                      , data = dt_analysis[country == cur_country], weights = pweight)
+  
+  # Test the proportional hazards assumption
+  ph_test <- survival::cox.zph(fit1_v1)
+  
+  cox_zph <- rbind(cox_zph, data.table(country = cur_country, model = "RTR wealth or beating just",variable =  rownames(ph_test$table), ph_test$table), fill = T)
+  
+  # method subtype accounting for failure, try categorical ed_level
   fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
                      curr_cohabit_timevary + ever_had_intercourse_timevary + ed_level + as.factor(current_contra_subtype) + beating_just,
                    data = dt_analysis[country == cur_country], weights = pweight)
   summary(fit1_v1)
-  
+
   tmp <- summary(fit1_v1)$coefficients %>% as.data.table(keep.rownames = T)
   tmp[, model := "contra subtype inc fail, drop knowledge, categorical education"]
   tmp[, country := cur_country]
   write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_all_contra_subtype_inc_fail_ed_level.csv")), row.names = F)
   coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
-  
-  # part 1 mod contra inc failure, outcome is sexual debut, categorical ed_level
+ 
+  # part 1 mod contra inc failure, outcome is sexual debut, try categorical ed_level
   fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_sex) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
                      curr_cohabit_timevary + ed_level + beating_just,
                    data = dt_analysis_first_sex_p1[country == cur_country], weights = pweight)
   summary(fit1_v1)
   
+  # Test the proportional hazards assumption
+  ph_test <- survival::cox.zph(fit1_v1)
+  
+  # save the results
+  cox_zph <- rbind(cox_zph, data.table(country = cur_country, model = "Two-stage model: part 1 outcome is first sexual intercourse, categorical education",variable =  rownames(ph_test$table), ph_test$table), fill = T)
+  
+
   tmp <- summary(fit1_v1)$coefficients %>% as.data.table(keep.rownames = T)
   tmp[, model := "Two-stage model: part 1 outcome is first sexual intercourse, categorical education"]
   tmp[, country := cur_country]
   write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_all_part_1_outcome_first_sex_ed_level.csv")), row.names = F)
   coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
-  
-  
-  # part 2 mod contra inc failure, outcome is first pregnancy, among those who had event_first_sex, categorical ed_level
+
+
+  # part 2 mod contra inc failure, outcome is first pregnancy, among those who had event_first_sex, try categorical ed_level
   fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
                      curr_cohabit_timevary + ed_level + mod_contra_inc_fail + beating_just,
                    data = dt_analysis_first_sex_p2[country == cur_country], weights = pweight)
   summary(fit1_v1)
   
+  # Test the proportional hazards assumption
+  ph_test <- survival::cox.zph(fit1_v1)
+  
+  # save the results
+  cox_zph <- rbind(cox_zph, data.table(country = cur_country, model = "Two-stage model: part 2 outcome is first pregnancy among those who have had sex, categorical education",variable =  rownames(ph_test$table), ph_test$table), fill = T)
+  
+
   tmp <- summary(fit1_v1)$coefficients %>% as.data.table(keep.rownames = T)
   tmp[, model := "Two-stage model: part 2 outcome is first pregnancy among those who have had sex, categorical education"]
   tmp[, country := cur_country]
   write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_all_part_2_outcome_first_preg_ed_level.csv")), row.names = F)
   coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
   
+  fit_cloglog <- svyglm(event_first_preg ~ as.factor(tstop) + urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head + 
+           ever_had_intercourse_timevary_unmarried*tstop + beating_just + ed_level+ mod_contra_inc_fail +curr_cohabit_timevary*tstop, design = dhs_design, 
+           family = binomial(link = "cloglog"))
+
+  tmp <- summary(fit_cloglog)$coefficients %>% as.data.table(keep.rownames = T)
+  # don't want tstop intercepts
+  tmp <- tmp[!grepl("as.factor(tstop)|Intercept", rn)]
+  tmp[, model := "cloglog: no contra lag, inc method failure, categorical education"]
+  # rename columns to align with cox ph 
+  setnames(tmp, c("rn", "Estimate", "Pr(>|t|)"), c("rn", "coef", "Pr(>|z|)"))
+  tmp[, country := cur_country]
+  write.csv(tmp, file.path(out.dir, "model_results", paste0(ihme_loc_id, "_clog_log_survey_weighted_all_contra_inc_fail_ed_level.csv")), row.names = F)
+  coefs <- rbind(coefs, tmp[, data := paste0(ihme_loc_id, "_ALL")], fill = T)
+
   # save results
   write.csv(x = coefs[grepl(ihme_loc_id, data)], file.path(out.dir, paste0(ihme_loc_id, "_models_coefs.csv")), row.names = F)
-  
+  # save ph test results
+  write.csv(x = cox_zph, file.path(out.dir, paste0(ihme_loc_id, "_models_ph_test.csv")), row.names = F)
   # return table of coefficients
   return(coefs)
 }
@@ -318,3 +441,73 @@ coefs_gha <- test_models(cur_country = "gh")
 coefs_mwi <- test_models(cur_country = "mw")
 coefs_npl <- test_models(cur_country = "np")
 coefs_rwa <- test_models(cur_country = "rw")
+
+
+
+# SURVEY-SPECIFIC MODELS ------------------------------------------------------
+
+## try special decision_use_self_joint from NPL DHS 2022 ----
+
+# NPL DHS 2022
+
+# mod contra inc failure, add decision_use_joint_respondent_timevary_np_2022
+fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
+                   curr_cohabit_timevary + ever_had_intercourse_timevary + educ_yrs_timevary + attend_school_timevary + mod_contra_inc_fail +
+                   decision_use_joint_respondent_timevary_np_2022 + wants_children + beating_just,
+                 data = dt_analysis[survey == "NPL_DHS8_2022"], weights = pweight)
+summary(fit1_v1)
+
+tmp <- summary(fit1_v1)$coefficients %>% as.data.table(keep.rownames = T)
+tmp[, model := "Contra inc failure, drop knowledge, add decision to use/not use"]
+write.csv(tmp, file.path(out.dir, "model_results", "NPL_DHS8_2022_contra_inc_fail_drop_knowledge_add_decision.csv"), row.names = F)
+
+
+## try two part model, outcome is sexual activity ----
+
+# create event of first sexual intercourse
+dt_analysis[ever_had_intercourse_timevary == 1, first_sex_cmc := min(month_cmc, na.rm = T), by = c("survey", "id_unique")]
+dt_analysis[first_sex_cmc == month_cmc, event_first_sex := 1]
+dt_analysis[is.na(first_sex_cmc) | first_sex_cmc != month_cmc, event_first_sex := 0]
+
+dt_analysis_first_sex_p1 <- dt_analysis[is.na(first_sex_cmc) | month_cmc <= first_sex_cmc]
+dt_analysis_first_sex_p1 <- dt_analysis_first_sex_p1[age_1st_sex_imp >= age_start]
+
+dt_analysis_first_sex_p2 <- dt_analysis[month_cmc >= first_sex_cmc]
+dt_analysis_first_sex_p2 <- dt_analysis_first_sex_p2[age_1st_sex_imp >= age_start]
+
+# Nepal
+fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_sex) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
+                   curr_cohabit_timevary + educ_yrs_timevary + attend_school_timevary + mod_contra_inc_fail + 
+                   wants_children + beating_just,
+                 data = dt_analysis_first_sex_p1[country == "np"], weights = pweight)
+summary(fit1_v1)
+
+fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_first_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
+                   curr_cohabit_timevary + educ_yrs_timevary + attend_school_timevary + mod_contra_inc_fail + 
+                   wants_children + beating_just,
+                 data = dt_analysis_first_sex_p2[country == "np"], weights = pweight)
+summary(fit1_v1)
+
+
+## try unwanted pregnancies as the outcome ----
+
+dt_special <- dt_analysis[grepl("NPL_DHS8", survey) & (cmc_interview_date - month_cmc) <= 35]
+dt_special[, event_unwanted_preg := 0]
+dt_special[preg_desire_later == 1 | preg_desire_not_at_all == 1, event_unwanted_preg := 1]
+
+fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_unwanted_preg) ~ urban + as_factor(windex5) + mean_yrs_schooling_head +
+                   curr_cohabit_timevary + ever_had_intercourse_timevary + educ_yrs_timevary + attend_school_timevary + mod_contra_inc_fail +
+                   decision_use_joint_respondent_timevary_np_2022 + wants_children + beating_just,
+                 data = dt_special, weights = pweight)
+summary(fit1_v1)
+
+dt_special <- dt_analysis[!grepl("NPL_DHS8", survey) & (cmc_interview_date - month_cmc) <= 59]
+dt_special[, event_unwanted_preg := 0]
+dt_special[preg_desire_later == 1 | preg_desire_not_at_all == 1, event_unwanted_preg := 1]
+
+fit1_v1 <- coxph(formula = Surv(tstart, tstop, event_unwanted_preg) ~ urban + as_factor(wealth_quintiles) + mean_yrs_schooling_head +
+                   curr_cohabit_timevary + ever_had_intercourse_timevary + educ_yrs_timevary + attend_school_timevary + mod_contra_inc_fail +
+                   wants_children + beating_just,
+                 data = dt_special, weights = pweight)
+summary(fit1_v1)
+
